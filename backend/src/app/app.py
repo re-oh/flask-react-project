@@ -16,7 +16,6 @@ def get_single_user(user_id):
     OK_RESPONSE = 200
     BAD_RESPONSE = 404
     user = users.getUser(user_id)
-
     if user:
       return user, OK_RESPONSE
     elif user == None:
@@ -29,8 +28,8 @@ def create_user():
     data = request.get_json()
 
     if 'name' in data and 'lastname' in data:
-      new_user = users.createUser(data,returnNewUser=True)
-      return jsonify(new_user), OK_RESPONSE
+      new_user = users.createUser(data, returnNewUser=True, returnAsJson=True)
+      return new_user, OK_RESPONSE
     else:
       return f"invalid UserData:{jsonify(data)}", BAD_RESPONSE
 
@@ -39,14 +38,13 @@ def update_user(user_id):
   OK_RESPONSE = 204
   BAD_RESPONSE = 404
   data = request.get_json()
-  user = next((user for user in users if user["id"] == user_id), None)  
-  if user:
-    if 'name' in data and 'lastname' in data:
-      user['name'] = data['name']
-      user['lastname'] = data['lastname']
-      return f"patched user {user_id}\n with new data {jsonify(data)}", OK_RESPONSE
-    else:
-      return f"Invalid user Id{user_id} data not patched", BAD_RESPONSE
+
+  if 'name' in data and 'lastname' in data and users.userExists(user_id):
+    users.patchUser(user_id, data)
+    return f"patched user {user_id}\n with new data {jsonify(data)}", OK_RESPONSE
+  
+  else:
+    return f"Invalid user Id{user_id} data not patched", BAD_RESPONSE
 
 @app.route('/users/<int:user_id>', methods=['PUT'])
 def create_or_update_user(user_id):
@@ -54,21 +52,16 @@ def create_or_update_user(user_id):
       "PATCHED":204,
       "CREATED":200
     }
-    data = request.get_json()
-    user = next((user for user in users if user["id"] == user_id), None)  
-    if user:
+    data = request.get_json()  
+
+    if users.userExists(user_id):
       if 'name' in data and 'lastname' in data:
-        user['name'] = data['name']
-        user['lastname'] = data['lastname']
+        users.patchUser(user_id, data)
         return f"patched user {user_id}\n with new data {jsonify(data)}", OK_RESPONSE['PATCHED']
+  
       else:
-        new_user = {
-          "id":generateId(users),
-          "name":data["name"],
-          "lastname":data["lastname"]
-        }
-        users.append(new_user)
-        return jsonify(new_user), OK_RESPONSE['CREATED']
+        new_user = users.createUser(data, returnNewUser=True, returnAsJson=True)
+        return new_user, OK_RESPONSE['CREATED']
 
 
 @app.route('/users/<int:user_id>', methods=['DELETE'])

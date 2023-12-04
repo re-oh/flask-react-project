@@ -1,39 +1,48 @@
 from flask import jsonify
-from src.managers.IdManager import generateId
+from src.managers.IdManager import IdManager
 
 class UserManager():
 
-  def __init__(self) -> None:
+  def __init__(self, IdManager:IdManager ) -> None:
+    self.Id = IdManager(0)
     self.users = []
 
   def getUser(self, user_id:int):
     return next((user for user in self.users if user["id"] == user_id), None)
   
-  def getUsers(self, returnAsJson:bool):
-    if jsonify:
+  def userExists(self, user_id:int) -> bool:
+    user = self.getUser(user_id)
+    if user:
+      return True
+    elif not user:
+      return False
+
+  
+  def getUserIndex(self, user_id:int) -> int:
+    return next((index for index, user in enumerate(self.users) if user["id"] == user_id), None)
+  
+  def getUsers(self, returnAsJson:bool) -> list[dict]:
+    if returnAsJson:
       return jsonify(self.users)
     else:
       return self.users
   
   def createUser(self, data:dict, returnNewUser:bool, returnAsJson:bool):
     new_user = {
-        "id":generateId(self.users),
+        "id":self.Id.genId(self.users),
         "name":data["name"],
         "lastname":data["lastname"]
       }
     self.users.append(new_user)
 
-    if (returnNewUser, returnAsJson) == (True, True):
+    if returnNewUser and returnAsJson:
       return jsonify(new_user)
-    
+    elif returnNewUser and not returnAsJson:
+      return new_user
+    else:
+      pass
 
-    
-    match (returnNewUser, returnAsJson):
-      case True, True:
-        return jsonify(new_user)
-      case False, True:
-        pass
-      case True, False:
-        return new_user
-      case False, False:
-        pass
+  def patchUser(self, user_id:int, data:dict):
+    userIndex = self.getUserIndex(user_id)
+    self.users[userIndex]['name'] = data['name']
+    self.users[userIndex]['lastname'] = data['lastname']
