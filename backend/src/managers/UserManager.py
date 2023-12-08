@@ -1,10 +1,10 @@
 from flask import jsonify
-from src.managers.IdManager import IdManager
+from managers.IdManager import IdManager
 
 class UserManager():
 
   def __init__(self, IdManager:IdManager ) -> None:
-    self.Id = IdManager(0)
+    self.Id = IdManager
     self.users = []
 
   def getUser(self, user_id:int):
@@ -29,7 +29,7 @@ class UserManager():
   
   def createUser(self, data:dict, returnNewUser:bool, returnAsJson:bool):
     new_user = {
-        "id":self.Id.genId(self.users),
+        "id":self.Id.genId(),
         "name":data["name"],
         "lastname":data["lastname"]
       }
@@ -44,5 +44,6 @@ class UserManager():
 
   def patchUser(self, user_id:int, data:dict):
     userIndex = self.getUserIndex(user_id)
-    self.users[userIndex]['name'] = data['name']
-    self.users[userIndex]['lastname'] = data['lastname']
+  
+    self.users[userIndex]['name'] = str(data['name'])
+    self.users[userIndex]['lastname'] = str(data['lastname'])

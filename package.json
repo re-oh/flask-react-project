@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "apitest": "cd backend && poetry run pytest"
+    "apitest": "cd backend && poetry run pytest",
+    "api": "cd backend && poetry run python src/app.py"
   },
   "dependencies": {
     "react": "^18.2.0",
