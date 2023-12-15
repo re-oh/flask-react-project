@@ -4,8 +4,8 @@ from managers.IdManager import IdManager
 class UserManager():
 
   def __init__(self, IdManager:IdManager ) -> None:
-    self.Id = IdManager
-    self.users = []
+    self.Id: IdManager = IdManager
+    self.users: list[dict] = []
 
   def getUser(self, user_id:int):
     return next((user for user in self.users if user["id"] == user_id), None)
